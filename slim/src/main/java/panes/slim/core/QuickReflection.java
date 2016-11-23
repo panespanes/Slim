@@ -7,28 +7,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * reflect util.
  * Created by panes.
  */
-public class QuickReflection {
+public final class QuickReflection {
     private static AssertionFailureHandler sFailureHandler;
 
     public static interface AssertionFailureHandler {
-        boolean onAssertionFailure(HackDeclaration.HackAssertionException hackAssertionException);
+        boolean onAssertionFailure(QrDeclaration.AssertionException assertionException);
     }
 
-    public static abstract class HackDeclaration {
+    /**
+     * handle a reflection error.
+     */
+    public static abstract class QrDeclaration {
 
-        public static class HackAssertionException extends Throwable {
+        public static class AssertionException extends Throwable {
             private static final long serialVersionUID = 1;
             private Class<?> mHackedClass;
             private String mHackedFieldName;
             private String mHackedMethodName;
 
-            public HackAssertionException(String str) {
+            public AssertionException(String str) {
                 super(str);
             }
 
-            public HackAssertionException(Exception exception) {
+            public AssertionException(Exception exception) {
                 super(exception);
             }
 
@@ -62,49 +66,60 @@ public class QuickReflection {
         }
     }
 
-    public static class HackedClass<C> {
+    /**
+     * use this to describe a reflection result.
+     * @param <C>
+     */
+    public static class QrClass<C> {
         protected Class<C> mClass;
 
-        public <T> HackedField<C, T> staticField(String str) throws HackDeclaration.HackAssertionException {
-            return new HackedField<C, T>(this.mClass, str, 8);
+        public <T> QrField<C, T> staticField(String str) throws QrDeclaration.AssertionException {
+            return new QrField<C, T>(this.mClass, str, 8);
         }
 
-        public <T> HackedField<C, T> field(String str) throws HackDeclaration.HackAssertionException {
-            return new HackedField(this.mClass, str, 0);
+        public <T> QrField<C, T> field(String str) throws QrDeclaration.AssertionException {
+            return new QrField(this.mClass, str, 0);
         }
 
-        public HackedMethod staticMethod(String str, Class<?>... clsArr) throws HackDeclaration.HackAssertionException {
-            return new HackedMethod(this.mClass, str, clsArr, 8);
+        /**
+         * static modifier equals 8
+         * @param str
+         * @param clsArr
+         * @return
+         * @throws QrDeclaration.AssertionException
+         */
+        public QrMethod staticMethod(String str, Class<?>... clsArr) throws QrDeclaration.AssertionException {
+            return new QrMethod(this.mClass, str, clsArr, 8);//according to Modifier.toString();
         }
 
-        public HackedMethod method(String str, Class<?>... clsArr) throws HackDeclaration.HackAssertionException {
-            return new HackedMethod(this.mClass, str, clsArr, 0);
+        public QrMethod method(String str, Class<?>... clsArr) throws QrDeclaration.AssertionException {
+            return new QrMethod(this.mClass, str, clsArr, 0);
         }
 
-        public HackedConstructor constructor(Class<?>... clsArr) throws HackDeclaration.HackAssertionException {
-            return new HackedConstructor(this.mClass, clsArr);
+        public QrConstructor constructor(Class<?>... clsArr) throws QrDeclaration.AssertionException {
+            return new QrConstructor(this.mClass, clsArr);
         }
 
-        public HackedClass(Class<C> cls) {
+        public QrClass(Class<C> cls) {
             this.mClass = cls;
         }
 
-        public Class<C> getmClass() {
+        public Class<C> getMClass() {
             return this.mClass;
         }
     }
 
-    public static class HackedConstructor {
+    public static class QrConstructor {
         protected Constructor<?> mConstructor;
 
-        HackedConstructor(Class<?> cls, Class<?>[] clsArr) throws HackDeclaration.HackAssertionException {
+        QrConstructor(Class<?> cls, Class<?>[] paramsArr) throws QrDeclaration.AssertionException {
             if (cls != null) {
                 try {
-                    this.mConstructor = cls.getDeclaredConstructor(clsArr);
+                    this.mConstructor = cls.getDeclaredConstructor(paramsArr);
                 } catch (Exception e) {
-                    HackDeclaration.HackAssertionException hackAssertionException = new HackDeclaration.HackAssertionException(e);
-                    hackAssertionException.setHackedClass(cls);
-                    QuickReflection.fail(hackAssertionException);
+                    QrDeclaration.AssertionException assertionException = new QrDeclaration.AssertionException(e);
+                    assertionException.setHackedClass(cls);
+                    QuickReflection.fail(assertionException);
                 }
             }
         }
@@ -121,29 +136,29 @@ public class QuickReflection {
         }
     }
 
-    public static class HackedField<C, T> {
+    public static class QrField<C, T> {
         private final Field mField;
 
-        public HackedField<C, T> ofGenericType(Class<?> cls) throws HackDeclaration.HackAssertionException {
+        public QrField<C, T> ofGenericType(Class<?> cls) throws QrDeclaration.AssertionException {
             if (!(this.mField == null || cls.isAssignableFrom(this.mField.getType()))) {
-                QuickReflection.fail(new HackDeclaration.HackAssertionException(new ClassCastException(this.mField + " is not of type " + cls)));
+                QuickReflection.fail(new QrDeclaration.AssertionException(new ClassCastException(this.mField + " is not of type " + cls)));
             }
             return this;
         }
 
-        public HackedField<C, T> ofType(Class<?> cls) throws HackDeclaration.HackAssertionException {
+        public QrField<C, T> ofType(Class<?> cls) throws QrDeclaration.AssertionException {
             if (!(this.mField == null || cls.isAssignableFrom(this.mField.getType()))) {
-                QuickReflection.fail(new HackDeclaration.HackAssertionException(new ClassCastException(this.mField + " is not of type " + cls)));
+                QuickReflection.fail(new QrDeclaration.AssertionException(new ClassCastException(this.mField + " is not of type " + cls)));
             }
             return this;
         }
 
-        public HackedField<C, T> ofType(String str) throws HackDeclaration.HackAssertionException {
-            HackedField<C, T> ofType = null;
+        public QrField<C, T> ofType(String str) throws QrDeclaration.AssertionException {
+            QrField<C, T> ofType = null;
             try {
                 ofType = ofType((Class<T>) Class.forName(str));
             } catch (Exception e) {
-                QuickReflection.fail(new HackDeclaration.HackAssertionException(e));
+                QuickReflection.fail(new QrDeclaration.AssertionException(e));
             }
             return ofType;
         }
@@ -165,7 +180,7 @@ public class QuickReflection {
             }
         }
 
-        HackedField(Class<C> cls, String str, int i) throws HackDeclaration.HackAssertionException {
+        QrField(Class<C> cls, String str, int i) throws QrDeclaration.AssertionException {
             Field field = null;
             if (cls == null) {
                 this.mField = null;
@@ -174,14 +189,14 @@ public class QuickReflection {
             try {
                 field = cls.getDeclaredField(str);
                 if (i > 0 && (field.getModifiers() & i) != i) {
-                    QuickReflection.fail(new HackDeclaration.HackAssertionException(field + " does not match modifiers: " + i));
+                    QuickReflection.fail(new QrDeclaration.AssertionException(field + " does not match modifiers: " + i));
                 }
                 field.setAccessible(true);
             } catch (Exception e) {
-                HackDeclaration.HackAssertionException hackAssertionException = new HackDeclaration.HackAssertionException(e);
-                hackAssertionException.setHackedClass(cls);
-                hackAssertionException.setHackedFieldName(str);
-                QuickReflection.fail(hackAssertionException);
+                QrDeclaration.AssertionException assertionException = new QrDeclaration.AssertionException(e);
+                assertionException.setHackedClass(cls);
+                assertionException.setHackedFieldName(str);
+                QuickReflection.fail(assertionException);
             } finally {
                 this.mField = field;
             }
@@ -192,7 +207,7 @@ public class QuickReflection {
         }
     }
 
-    public static class HackedMethod {
+    public static class QrMethod {
         protected final Method mMethod;
 
         public Object invoke(Object obj, Object... objArr) throws IllegalArgumentException, InvocationTargetException {
@@ -205,7 +220,7 @@ public class QuickReflection {
             return obj2;
         }
 
-        HackedMethod(Class<?> cls, String str, Class<?>[] clsArr, int i) throws HackDeclaration.HackAssertionException {
+        QrMethod(Class<?> cls, String str, Class<?>[] clsArr, int i) throws QrDeclaration.AssertionException {
             Method method = null;
             if (cls == null) {
                 this.mMethod = null;
@@ -214,14 +229,14 @@ public class QuickReflection {
             try {
                 method = cls.getDeclaredMethod(str, clsArr);
                 if (i > 0 && (method.getModifiers() & i) != i) {
-                    QuickReflection.fail(new HackDeclaration.HackAssertionException(method + " does not match modifiers: " + i));
+                    QuickReflection.fail(new QrDeclaration.AssertionException(method + " does not match modifiers: " + i));
                 }
                 method.setAccessible(true);
             } catch (Exception e) {
-                HackDeclaration.HackAssertionException hackAssertionException = new HackDeclaration.HackAssertionException(e);
-                hackAssertionException.setHackedClass(cls);
-                hackAssertionException.setHackedMethodName(str);
-                QuickReflection.fail(hackAssertionException);
+                QrDeclaration.AssertionException assertionException = new QrDeclaration.AssertionException(e);
+                assertionException.setHackedClass(cls);
+                assertionException.setHackedMethodName(str);
+                QuickReflection.fail(assertionException);
             } finally {
                 this.mMethod = method;
             }
@@ -232,22 +247,22 @@ public class QuickReflection {
         }
     }
 
-    public static <T> HackedClass<T> into(Class<T> cls) {
-        return new HackedClass(cls);
+    public static <T> QrClass<T> into(Class<T> cls) {
+        return new QrClass(cls);
     }
 
-    public static <T> HackedClass<T> into(String str) throws HackDeclaration.HackAssertionException {
+    public static <T> QrClass<T> into(String str) throws QrDeclaration.AssertionException {
         try {
-            return new HackedClass(Class.forName(str));
+            return new QrClass(Class.forName(str));
         } catch (Exception e) {
-            fail(new HackDeclaration.HackAssertionException(e));
-            return new HackedClass(null);
+            fail(new QrDeclaration.AssertionException(e));
+            return new QrClass(null);
         }
     }
 
-    private static void fail(HackDeclaration.HackAssertionException hackAssertionException) throws HackDeclaration.HackAssertionException {
-        if (sFailureHandler == null || !sFailureHandler.onAssertionFailure(hackAssertionException)) {
-            throw hackAssertionException;
+    private static void fail(QrDeclaration.AssertionException assertionException) throws QrDeclaration.AssertionException {
+        if (sFailureHandler == null || !sFailureHandler.onAssertionFailure(assertionException)) {
+            throw assertionException;
         }
     }
 
