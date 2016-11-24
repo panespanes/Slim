@@ -1,9 +1,12 @@
 package panes.slim;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.view.ContextThemeWrapper;
 
-import panes.slim.core.ResourcesManger;
+import panes.slim.core.QuickReflection;
+import panes.slim.core.Runtime;
 import panes.slim.inflater.resources.drawable.DrawableInflater;
 
 /**
@@ -15,8 +18,41 @@ public class Slim {
     /**
      * call when application created in case of long time starting activity.
      */
-    public static void init(Context context, SlimListener slimListener) {
-        new ResourcesManger().initResources(context, slimListener); //get prepared for ResourcesBundle.
+    public static void init(Context context, final SlimListener slimListener) {
+//        new ResourcesManger().initResources(context, new SlimListener() {
+//            @Override
+//            public void onSuccess() {
+//                ActivityThread = Hack.into("android.app.ActivityThread");
+        Runtime.Resources = QuickReflection.into(Resources.class);
+//                Application = Hack.into(Application.class);
+//                AssetManager = Hack.into(AssetManager.class);
+//                IPackageManager = Hack.into("android.content.pm.IPackageManager");
+//                Service = Hack.into(Service.class);
+        try {
+            Runtime.ContextImpl = QuickReflection.into("android.app.ContextImpl");
+            Runtime.ContextThemeWrapper = QuickReflection.into(ContextThemeWrapper.class);
+            Runtime.ContextWrapper = QuickReflection.into("android.content.ContextWrapper");
+
+            Runtime.ContextImpl_resources = Runtime.ContextImpl.field("mResources");
+            Runtime.ContextImpl_theme = Runtime.ContextImpl.field("mTheme");
+//                    ContextThemeWrapper_resources;
+//                    Runtime.ContextThemeWrapper_context = Runtime.ContextThemeWrapper.field("mBase");
+
+//                    public static QuickReflection.QrClass<Resources> Resources;
+//                    public static QuickReflection.QrClass<Object> ActivityThread;
+        } catch (QuickReflection.QrException e) {
+            e.printStackTrace();
+            slimListener.onError(e.toString());
+        }
+
+//                slimListener.onSuccess();
+//            }
+//
+//            @Override
+//            public void onError(String msg) {
+//                slimListener.onError(msg);
+//            }
+//        }); //get prepared for ResourcesBundle.
     }
 
 

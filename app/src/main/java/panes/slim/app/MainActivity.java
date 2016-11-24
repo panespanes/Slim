@@ -3,7 +3,6 @@ package panes.slim.app;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -11,12 +10,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
-
-import panes.slim.Slim;
-import panes.slim.SlimBundle;
 import panes.slim.SlimConfig;
-import panes.slim.SlimListener;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "Slim";
@@ -32,9 +26,13 @@ public class MainActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
         } else {
-            dynamicLoad();
+            tv.setText("show resource in bundle.");
+            iv.setImageResource(getId());
         }
 
+    }
+    public int getId (){
+        return getResources().getIdentifier("logo", "drawable", SlimConfig.getResourcesBundles()[0].getPackageName());
     }
 
     @Override
@@ -44,28 +42,12 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission Granted
                 Log.i(TAG, "start slim");
-                dynamicLoad();
+//                dynamicLoad();
             } else {
                 tv.setText("未开启读取SD卡权限.");
             }
         }
     }
 
-    private void dynamicLoad() {
-        SlimBundle slimBundle = new SlimBundle("panes.slim.bundle", Environment.getExternalStorageDirectory() + File.separator +  "slim.bundle.apk", SlimBundle.TYPE_RESOURCES);
-        SlimConfig.addResourcesBundle(slimBundle);
-        Slim.init(getApplicationContext(), new SlimListener() {
-            @Override
-            public void onSuccess() {
-                Log.i(TAG, "initResource onSuccess.");
-                tv.setText("show resource in bundle.");
-                iv.setImageDrawable(Slim.getDrawable("logo"));
-            }
 
-            @Override
-            public void onError(String msg) {
-                tv.setText(msg);
-            }
-        });
-    }
 }
