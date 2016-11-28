@@ -7,7 +7,10 @@ public class SlimConfig {
     private SlimConfig (){}
     public static String TAG = "Slim";
     public static boolean isDebug = true;
-
+    /**
+     * className to redirect in case of startup failure. e.g."panes.slim.app.MainActivity"
+     */
+    public static String BackUpActivity;
 
 
     /**

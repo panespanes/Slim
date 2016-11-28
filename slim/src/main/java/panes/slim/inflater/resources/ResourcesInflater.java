@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.text.TextUtils;
 
 import panes.slim.SlimConfig;
+import panes.slim.SlimException;
 import panes.slim.core.ResourcesManger;
 import panes.slim.util.LogUtil;
 
@@ -16,7 +17,11 @@ public class ResourcesInflater {
     protected static String TYPE_LAYOUT = "layout";
     protected void initResources(){
         if (mResources == null){
-            mResources = new ResourcesManger().getResources();
+            try {
+                mResources = new ResourcesManger().getResources();
+            } catch (SlimException e) {
+                e.printStackTrace();
+            }
         }
     }
 

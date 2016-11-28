@@ -10,6 +10,21 @@ import java.lang.reflect.Method;
  */
 public class SysHook {
     public static int mErrorCode;
+
+    public static QuickReflection.QrClass<Instrumentation> Instrumentation;
+
+    public static void hook(){
+        hookInstrumentation();
+    }
+
+    private static void hookInstrumentation(){
+        try {
+            Instrumentation = QuickReflection.into("android.app.Instrumentation");
+        } catch (QuickReflection.QrException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static AssetManager new_AssetManager() {
         try {
             AssetManager assetManager = AssetManager.class.newInstance();

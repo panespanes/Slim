@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * Created by panes.
  */
-public class SlimException extends RuntimeException {
+public class SlimException extends Throwable {
     private int mErrorCode;
     private static HashMap<Integer, String> map = new HashMap<>();
     static {

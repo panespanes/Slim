@@ -20,16 +20,18 @@ import panes.slim.util.LogUtil;
 public class ResourcesManger {
     private static AssetManager mAssetManager;
     public static Context applicationContext;
+    public static Resources mResources;
     /**
      * return instance of Resources that is loaded by specific AssetManager
      * @return
      */
-    public Resources getResources() {
-        Resources resources = new Resources(mAssetManager, applicationContext.getResources().getDisplayMetrics(), applicationContext.getResources().getConfiguration());
-        if (resources == null)
+    public Resources getResources() throws SlimException{
+        mResources = new Resources(mAssetManager, applicationContext.getResources().getDisplayMetrics(), applicationContext.getResources().getConfiguration());
+        if (mResources == null) {
             LogUtil.i("warning: resources = null");
-
-        return resources;
+            throw  new SlimException(3);
+        }
+        return mResources;
     }
 
     public void initResources(Context context, SlimListener slimListener){

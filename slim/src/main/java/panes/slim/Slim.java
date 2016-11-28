@@ -5,6 +5,9 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.view.ContextThemeWrapper;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import panes.slim.core.QuickReflection;
 import panes.slim.core.Runtime;
 import panes.slim.inflater.resources.drawable.DrawableInflater;
@@ -37,12 +40,20 @@ public class Slim {
             Runtime.ContextImpl_theme = Runtime.ContextImpl.field("mTheme");
 //                    ContextThemeWrapper_resources;
 //                    Runtime.ContextThemeWrapper_context = Runtime.ContextThemeWrapper.field("mBase");
-
+            Method mth = Slim.class.getMethod("getDrawable", String.class);
+            Object avatar = mth.invoke(new Slim(), "avatar");
+            Runtime.Slim = QuickReflection.into(Slim.class);
 //                    public static QuickReflection.QrClass<Resources> Resources;
 //                    public static QuickReflection.QrClass<Object> ActivityThread;
         } catch (QuickReflection.QrException e) {
             e.printStackTrace();
             slimListener.onError(e.toString());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
 
 //                slimListener.onSuccess();
