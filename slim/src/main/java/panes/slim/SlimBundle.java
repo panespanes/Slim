@@ -43,4 +43,12 @@ public class SlimBundle {
         return packageName;
     }
 
+    @Override
+    public String toString() {
+        return "SlimBundle{" +
+                "packageName='" + packageName + '\'' +
+                ", path='" + path + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

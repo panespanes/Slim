@@ -18,13 +18,13 @@ public class ContextImplHook extends ContextWrapper {
     @Override
     public Resources getResources() {
         LogUtil.i("hook getResources");
-        return ResourcesManger.mResources;
+        return ResourcesManager.mResources;
     }
 
     @Override
     public AssetManager getAssets() {
         LogUtil.i("hook getAssets");
-        return ResourcesManger.mResources.getAssets();
+        return ResourcesManager.mResources.getAssets();
     }
 
 }

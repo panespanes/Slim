@@ -2,8 +2,10 @@ package panes.slim.inflater.resources.drawable;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
-import panes.slim.core.ResourcesManger;
+import panes.slim.SlimConfig;
+import panes.slim.core.ResourcesManager;
 import panes.slim.inflater.resources.ResourcesInflater;
 
 /**
@@ -15,7 +17,7 @@ public class DrawableInflater extends ResourcesInflater implements IDrawableInfl
     }
     public static DrawableInflater instance(){
         if (mInstance == null){
-            mInstance = new DrawableInflater(ResourcesManger.applicationContext); // TODO. should always use app context?
+            mInstance = new DrawableInflater(ResourcesManager.applicationContext); // TODO. should always use app context?
         }
         return mInstance;
     }
@@ -34,7 +36,9 @@ public class DrawableInflater extends ResourcesInflater implements IDrawableInfl
 
     @Override
     public int inflateId(String resName) {
-        return super.inflateId(TYPE_DRAWABLE, resName);
+        int id = super.inflateId(TYPE_DRAWABLE, resName);
+        Log.i(SlimConfig.TAG, "id = " + id);
+        return id; // does not match.
     }
 
 }

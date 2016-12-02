@@ -62,7 +62,7 @@ public class InstrumentationHook extends Instrumentation {
         Activity newActivity = mInstrumentation.newActivity(cls, context, iBinder, application, intent, activityInfo, charSequence, activity, str, obj);
         if (Runtime.ContextThemeWrapper_resources != null) {
             // set replaced Resources
-            Runtime.ContextThemeWrapper_resources.set(newActivity, ResourcesManger.mResources);
+            Runtime.ContextThemeWrapper_resources.set(newActivity, ResourcesManager.mResources);
         }
         return newActivity;
     }
@@ -73,7 +73,7 @@ public class InstrumentationHook extends Instrumentation {
             newActivity = mInstrumentation.newActivity(classLoader, str, intent);
             if (Runtime.ContextThemeWrapper_resources != null) {
                 // set replaced Resources
-                Runtime.ContextThemeWrapper_resources.set(newActivity, ResourcesManger.mResources);
+                Runtime.ContextThemeWrapper_resources.set(newActivity, ResourcesManager.mResources);
             }
         } catch (ClassNotFoundException e) {
             String redirect = SlimConfig.BackUpActivity;

@@ -3,6 +3,7 @@ package panes.slim.core;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.util.Log;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +18,11 @@ import panes.slim.util.LogUtil;
 /**
  * Created by panes.
  */
-public class ResourcesManger {
+public class ResourcesManager {
+    public static AssetManager getAssetManager() {
+        return mAssetManager;
+    }
+
     private static AssetManager mAssetManager;
     public static Context applicationContext;
     public static Resources mResources;
@@ -39,7 +44,7 @@ public class ResourcesManger {
             throw new NullPointerException("SlimListener is null");
         }
         try {
-            new ResourcesManger().load(context, slimListener);
+            new ResourcesManager().load(context, slimListener);
         } catch (SlimException e) {
             slimListener.onError(e.getMsg());
         }
@@ -56,6 +61,7 @@ public class ResourcesManger {
             }
         } else {
             mAssetManager = assetManager;
+            Log.i(SlimConfig.TAG, "added asset path");
             listener.onSuccess();
         }
     }

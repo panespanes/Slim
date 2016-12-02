@@ -5,7 +5,7 @@ import android.text.TextUtils;
 
 import panes.slim.SlimConfig;
 import panes.slim.SlimException;
-import panes.slim.core.ResourcesManger;
+import panes.slim.core.ResourcesManager;
 import panes.slim.util.LogUtil;
 
 /**
@@ -18,7 +18,7 @@ public class ResourcesInflater {
     protected void initResources(){
         if (mResources == null){
             try {
-                mResources = new ResourcesManger().getResources();
+                mResources = new ResourcesManager().getResources();
             } catch (SlimException e) {
                 e.printStackTrace();
             }
