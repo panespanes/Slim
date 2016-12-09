@@ -1,7 +1,9 @@
 package panes.slim.app;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -16,18 +18,19 @@ import java.io.File;
 import panes.slim.Slim;
 import panes.slim.SlimBundle;
 import panes.slim.SlimConfig;
-import panes.slim.SlimListener;
-import panes.slim.core.ResourcesManager;
+import panes.slim.core.Inject;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "Slim";
     TextView tv;
     ImageView iv;
-
+    Resources resources;
+    Context mBase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Resources resourcesOnCreate = getResources();
         tv = (TextView) findViewById(R.id.tv);
         iv = (ImageView) findViewById(R.id.iv);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int getId() {
-        int id = getResources().getIdentifier("logo", "drawable", SlimConfig.getResourcesBundles()[0].getPackageName());
+        int id = getResources().getIdentifier("logob", "drawable", SlimConfig.getResourcesBundles()[0].getPackageName());
         Log.i(SlimConfig.TAG, String.valueOf("id =" + id));
         return id;
     }
@@ -78,44 +81,60 @@ public class MainActivity extends AppCompatActivity {
     private void dynamicLoad() {
         SlimBundle slimBundle = new SlimBundle("panes.slim.bundle", Environment.getExternalStorageDirectory() + File.separator + "slim.bundle.apk", SlimBundle.TYPE_RESOURCES);
         SlimConfig.addResourcesBundle(slimBundle);
-        Slim.init(getApplicationContext(), new SlimListener() {
-            @Override
-            public void onSuccess() {
-                Log.i(MainActivity.TAG, "initResource onSuccess.");
-                new ResourcesManager().initResources(getApplicationContext(), new SlimListener() {
-                    @Override
-                    public void onSuccess() {
-//                        iv.setImageDrawable(Slim.getDrawable("logo"));
-//                        test();
-                    }
-
-                    @Override
-                    public void onError(String msg) {
-
-                    }
-                });
-//                iv.setImageResource(getId());
-            }
-
-            @Override
-            public void onError(String msg) {
-                Log.i(MainActivity.TAG, "onError: " + msg);
-            }
-        });
+        Slim.init(getApplication());
     }
 
-    private void test() {
-        Slim.initSmall();
+//    private void test() {
+//        Slim.initSmall();
+//    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+//        try {
+//            resources = Slim.getDynamic(newBase);
+//            Field field = newBase.getClass().getDeclaredField("mResources");
+//            field.setAccessible(true);
+//            field.set(newBase, resources);
+//        } catch (NoSuchFieldException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
+        Inject.initDynamic(MyApplication.application, newBase);
+
+        super.attachBaseContext(newBase);
     }
 
+//    @Override
+//    public Resources getResources() {
+////        return super.getResources();
+//        return Slim.getDynamic(getApplication());
+//    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        test();
-//        iv.setImageDrawable(Slim.getDrawable("logo"));
-        int id = getResources().getIdentifier("logo", "drawable", "panes.app");
-        Log.i(SlimConfig.TAG, "id = "+String.valueOf(id));
-//        iv.setImageResource(id);
+//        Slim.init(getApplication());
+//        Resources resourcesOnResume = getResources();
+
+//        iv.setImageDrawable(resources.getDrawable(id));
+
+//        Resources res = Slim.getDynamic(getApplication());
+        Resources superRes = getResources();
+//        int id = superRes.getIdentifier("logob", "drawable", "panes.slim.bundle");
+        int superId = superRes.getIdentifier("logoy", "drawable", "panes.slim.app");
+//        int hookedId = Runtime.resources.getIdentifier("logob", "drawable", "panes.slim.app");
+        Log.i(SlimConfig.TAG, "id = " + Integer.toHexString(superId));
+//        Log.i(SlimConfig.TAG, "id = " + Integer.toHexString(hookedId));
+        iv.setImageDrawable(superRes.getDrawable(superId));
+
+
+
+//        iv.setImageResource(R.drawable.logob);
     }
+
+    private int getBundleId(){
+        return 0x7f020001;
+    }
+
 }

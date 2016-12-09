@@ -129,7 +129,7 @@ public final class QuickReflection {
             this.mClass = cls;
         }
 
-        public Class<C> getMClass() {
+        public Class<C> getmClass() {
             return this.mClass;
         }
     }

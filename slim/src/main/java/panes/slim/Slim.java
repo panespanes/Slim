@@ -1,14 +1,14 @@
 package panes.slim;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Application;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Environment;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import panes.slim.core.Inject;
 import panes.slim.core.QuickReflection;
 import panes.slim.core.Runtime;
 import panes.slim.core.SysHook;
@@ -31,108 +32,142 @@ public class Slim {
     /**
      * call when application created in case of long time starting activity.
      */
-    public static void init(Context context, final SlimListener slimListener) {
-//        new ResourcesManager().initResources(context, new SlimListener() {
-//            @Override
-//            public void onSuccess() {
-//                ActivityThread = Hack.into("android.app.ActivityThread");
-        Runtime.Resources = QuickReflection.into(Resources.class);
-//                Application = Hack.into(Application.class);
-//                AssetManager = Hack.into(AssetManager.class);
-//                IPackageManager = Hack.into("android.content.pm.IPackageManager");
-//                Service = Hack.into(Service.class);
-        try {
-
-            /**
-             * Context->ContextImpl.getAssets()/ContextImpl.getResources()
-             */
-
-            Runtime.ContextImpl = QuickReflection.into("android.app.ContextImpl");
-            Runtime.ContextThemeWrapper = QuickReflection.into(ContextThemeWrapper.class);
-            Runtime.ContextWrapper = QuickReflection.into("android.content.ContextWrapper");
-
-            Runtime.ContextImpl_resources = Runtime.ContextImpl.field("mResources");
-            Runtime.ContextImpl_theme = Runtime.ContextImpl.field("mTheme");
-//                    ContextThemeWrapper_resources;
-//                    Runtime.ContextThemeWrapper_context = Runtime.ContextThemeWrapper.field("mBase");
-//                    public static QuickReflection.QrClass<Resources> Resources;
-//                    public static QuickReflection.QrClass<Object> ActivityThread;
-
-            slimListener.onSuccess();
-        } catch (QuickReflection.QrException e) {
-            e.printStackTrace();
-            slimListener.onError(e.toString());
-        }
-
-//                slimListener.onSuccess();
-//            }
-//
-//            @Override
-//            public void onError(String msg) {
-//                slimListener.onError(msg);
-//            }
-//        }); //get prepared for ResourcesBundle.
-    }
-
-    @SuppressLint("NewApi")
-    public static void initSmall() {
+    public static void init(Application application) {
         try {
             SlimBundle slimBundle = new SlimBundle("panes.slim.bundle", Environment.getExternalStorageDirectory() + File.separator + "slim.bundle.apk", SlimBundle.TYPE_RESOURCES);
             SlimConfig.addResourcesBundle(slimBundle);
             AssetManager assetManager = SysHook.new_AssetManager();
             Method mth = SysHook.method_AssetManager_addAssetPath();
             SlimBundle[] bundles = SlimConfig.getResourcesBundles();
+            mth.invoke(assetManager,application.getPackageResourcePath(), bundles[0].getPath());
+            Resources resources = new Resources(assetManager, application.getResources().getDisplayMetrics(), application.getResources().getConfiguration());
+
+            Inject.injectResources(application, resources, assetManager);
+
+        }  catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.i(SlimConfig.TAG, "invoke");
+//        Runtime.Resources = QuickReflection.into(Resources.class);
+    }
+
+    public static void initDynamic(Application application) {
+        try {
+            SlimBundle slimBundle = new SlimBundle("panes.slim.bundle", Environment.getExternalStorageDirectory() + File.separator + "slim.bundle.apk", SlimBundle.TYPE_RESOURCES);
+            SlimConfig.addResourcesBundle(slimBundle);
+            AssetManager assetManager = SysHook.new_AssetManager();
+            Method mth = SysHook.method_AssetManager_addAssetPath();
+            SlimBundle[] bundles = SlimConfig.getResourcesBundles();
+            // need to add application.getResourcesPath
             mth.invoke(assetManager, bundles[0].getPath());
+            Object result3 = mth.invoke(assetManager, application.getPackageResourcePath());
+            Log.i(SlimConfig.TAG, "invoke");
+            QuickReflection.QrClass<Object> ContextImpl = QuickReflection.into("android.app.ContextImpl");
+            QuickReflection.QrField<Object, Resources> mResources = ContextImpl.field("mResources");
+            Resources resources = new Resources(assetManager, application.getResources().getDisplayMetrics(), application.getResources().getConfiguration());
+            mResources.set(application.getApplicationContext(), resources);
+
+            Log.i(SlimConfig.TAG, "set resources");
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (QuickReflection.QrException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Resources getDynamic(Application application) {
+        try {
+            SlimBundle slimBundle = new SlimBundle("panes.slim.bundle", Environment.getExternalStorageDirectory() + File.separator + "slim.bundle.apk", SlimBundle.TYPE_RESOURCES);
+            SlimConfig.addResourcesBundle(slimBundle);
+            AssetManager assetManager = SysHook.new_AssetManager();
+            Method mth = SysHook.method_AssetManager_addAssetPath();
+            Method mthSingle = SysHook.method_AssetManager_addAssetPath();
+            SlimBundle[] bundles = SlimConfig.getResourcesBundles();
+            mth.invoke(assetManager,application.getPackageResourcePath());
+            mth.invoke(assetManager,bundles[0].getPath());
+            Log.i(SlimConfig.TAG, "invoke");
+//            QuickReflection.QrClass<Context> Context = QuickReflection.into(Context.class);
+//            QuickReflection.QrField<Context, Resources> mResources = Context.field("mResources");
+            Log.i(SlimConfig.TAG, "get resources");
+            return new Resources(assetManager, application.getResources().getDisplayMetrics(), application.getResources().getConfiguration());
+//            mResources.set(context, resources);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @SuppressLint("NewApi")
+    public static void initSmall(Application application) {
+        try {
+            SlimBundle slimBundle = new SlimBundle("panes.slim.bundle", Environment.getExternalStorageDirectory() + File.separator + "slim.bundle.apk", SlimBundle.TYPE_RESOURCES);
+//            SlimBundle slimBundle2 = new SlimBundle("panes.slim.bundle2", Environment.getExternalStorageDirectory() + File.separator + "slim.bundle2.apk", SlimBundle.TYPE_RESOURCES);
+            SlimConfig.addResourcesBundle(slimBundle);
+            AssetManager assetManager = SysHook.new_AssetManager();
+            Method mth = SysHook.method_AssetManager_addAssetPath();
+            SlimBundle[] bundles = SlimConfig.getResourcesBundles();
+            // 0 on failure
+            Object result = mth.invoke(assetManager, bundles[0].getPath());
+            Log.i(SlimConfig.TAG, "addAssetPath result1 = "+(Integer)result);
+            Object result3 = mth.invoke(assetManager, application.getPackageResourcePath());
+            Log.i(SlimConfig.TAG, "addAssetPath result3 = "+(Integer)result3);
+            Runtime.resources = new Resources(assetManager, application.getResources().getDisplayMetrics(), application.getResources().getConfiguration());
 
             Method mEnsureStringBlocks = AssetManager.class.getDeclaredMethod("ensureStringBlocks", new Class[0]);
             mEnsureStringBlocks.setAccessible(true);
             mEnsureStringBlocks.invoke(assetManager, new Object[0]);
-
-//            Collection<WeakReference<Resources>> references = null;
-
-//            Class<?> resourcesManagerClass = Class.forName("android.app.ResourcesManager");
-//            Method mGetInstance = resourcesManagerClass.getDeclaredMethod("getInstance", new Class[0]);
-//            mGetInstance.setAccessible(true);
-//            Object resourcesManager = mGetInstance.invoke(null, new Object[0]);
-//            try {
-//                Field fMActiveResources = resourcesManagerClass.getDeclaredField("mActiveResources");
-//                fMActiveResources.setAccessible(true);
-//
-//                ArrayMap<?, WeakReference<Resources>> arrayMap = (ArrayMap) fMActiveResources.get(resourcesManager);
-//
-//                references = arrayMap.values();
-//            } catch (NoSuchFieldException ignore) {
-//            }
-//            Log.i(SlimConfig.TAG, "size = " + references.size());
-
 
             QuickReflection.QrClass<Object> QrResourcesManager = QuickReflection.into("android.app.ResourcesManager");
             QuickReflection.QrField<Object, ArrayMap<?, WeakReference<Resources>>> mActiveResources = QrResourcesManager.field("mActiveResources");
             QuickReflection.QrMethod getInstance = QrResourcesManager.staticMethod("getInstance");
             Object ResourcesManager = getInstance.invoke(null);
             ArrayMap<?, WeakReference<Resources>> weakReferenceArrayMap = mActiveResources.get(ResourcesManager);
-            Collection<WeakReference<Resources>> references2 = weakReferenceArrayMap.values();
-            Log.i(SlimConfig.TAG, "number = " + references2.size());
-            for (WeakReference<Resources> reference : references2) {
+            Collection<WeakReference<Resources>> references = weakReferenceArrayMap.values();
+            Log.i(SlimConfig.TAG, "resources size = " + references.size());
+            for (WeakReference<Resources> reference : references) {
                 Log.i(SlimConfig.TAG, "enter reference");
                 Resources resource = reference.get();
-                if (resource == null){
-                    Log.i(SlimConfig.TAG, "resource not null");
-                } else {
+                if (resource == null) {
                     Log.i(SlimConfig.TAG, "resource is null");
+                } else {
+                    Log.i(SlimConfig.TAG, "resource not null");
                 }
                 try {
                     Field mAssets = resource.getClass().getDeclaredField("mAssets");
                     mAssets.setAccessible(true);
                     mAssets.set(resource, assetManager);
                     Log.i(SlimConfig.TAG, "hook mAssets");
-                } catch (NoSuchFieldException e){
-                    // MIUI ?!
+                } catch (NoSuchFieldException e) {
+                    // MiUIResources ?!
                     Field mResourcesImpl = resource.getClass().getDeclaredField("mResourcesImpl");
                     mResourcesImpl.setAccessible(true);
                     Object resourcesImpl = mResourcesImpl.get(resource);
                     Field mAssets1 = resourcesImpl.getClass().getDeclaredField("mAssets");
                     mAssets1.set(resource, assetManager);
+                }
+
+                if (Build.VERSION.SDK_INT >= 21) {
+                    for (WeakReference<Resources> wr : references) {
+                        Resources resources = wr.get();
+                        if (resources == null) continue;
+
+                        // android.util.Pools$SynchronizedPool<TypedArray>
+                        Field mTypedArrayPool = Resources.class.getDeclaredField("mTypedArrayPool");
+                        mTypedArrayPool.setAccessible(true);
+                        Object typedArrayPool = mTypedArrayPool.get(resources);
+                        // Clear all the pools
+                        Method acquire = typedArrayPool.getClass().getMethod("acquire");
+                        acquire.setAccessible(true);
+                        while (acquire.invoke(typedArrayPool) != null) ;
+                    }
                 }
                 resource.updateConfiguration(resource.getConfiguration(), resource.getDisplayMetrics());
 
@@ -143,11 +178,9 @@ public class Slim {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
 //        catch (ClassNotFoundException e) {

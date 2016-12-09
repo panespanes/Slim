@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.0"
 
     defaultConfig {
-        applicationId "panes.slim.bundle"
+        applicationId "panes.slim.app"
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 1

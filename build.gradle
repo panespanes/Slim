@@ -3,7 +3,16 @@ buildscript {
     repositories {
         jcenter()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.2'
+//        classpath 'org.aspectj:aspectjtools:1.8.6'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
     }
 }
