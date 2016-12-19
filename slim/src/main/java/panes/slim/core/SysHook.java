@@ -28,7 +28,6 @@ public class SysHook {
     public static AssetManager new_AssetManager() {
         try {
             AssetManager assetManager = AssetManager.class.newInstance();
-            // cannot new AssetManager api24: AssetManager() {throw new RuntimeException("Stub!");}
         return assetManager;
         } catch (InstantiationException e) {
             e.printStackTrace();

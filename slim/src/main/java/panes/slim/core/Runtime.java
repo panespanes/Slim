@@ -1,8 +1,10 @@
 package panes.slim.core;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 
 import panes.slim.Slim;
@@ -24,9 +26,12 @@ public class Runtime {
     public static QuickReflection.QrMethod  getAvatar;
 
     public static QuickReflection.QrClass<Object> LoadedApk;
+    public static QuickReflection.QrField<Object, String> LoadedApk_mResDir;
     public static QuickReflection.QrMethod ActivityThread_currentActivityThread;
-    public static QuickReflection.QrField<Object, Map<String, Object>> ActivityThread_mPackages;
+    public static QuickReflection.QrField<Object, Map<String, WeakReference<?>>> ActivityThread_mPackages;
+    public static QuickReflection.QrField<Object, Map<String, WeakReference<?>>> ActivityThread_mResourcePackages;
     public static QuickReflection.QrField<Object, Resources> LoadedApk_mResources;
 
+    public static AssetManager AssetManager;
     public static Resources resources;
 }

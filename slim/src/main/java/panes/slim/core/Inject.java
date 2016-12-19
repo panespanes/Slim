@@ -295,7 +295,7 @@ public class Inject {
 
     }
 
-    public static void injectTheme (Activity activity, Context context){
+    public static void injectTheme (Activity activity){
         Resources.Theme theme = activity.getTheme();
         try {
             try {

@@ -21,6 +21,6 @@
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:id="@+id/iv"
-        android:src="@drawable/logog"
+        android:src="@drawable/logob"
         android:scaleType="fitCenter"/>
 </RelativeLayout>
