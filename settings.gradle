@@ -1,1 +1,1 @@
-include ':slim', ':bundle', ':app'
+include ':slim', ':bundle', ':app', ':plugin', ':plugin'

@@ -24,3 +24,17 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.1.1'
     compile project(':slim')
 }
+buildscript {
+    repositories {
+        maven {//本地Maven仓库地址
+            url uri('../repo')
+        }
+    }
+    dependencies {
+        //格式为-->group:module:version
+        classpath 'panes.slim.plugin:plugin:1.0.0'
+    }
+}
+//com.hc.gradle为resources/META-INF/gradle-plugins
+//下的properties文件名称
+apply plugin: 'panes.slim.plugin'

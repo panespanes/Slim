@@ -19,7 +19,16 @@ public class MyApplication extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        Inject.injectTK(this, base);
+//        ComponentName cName = new ComponentName("com.android.launcher",
+//                "com.android.launcher2.Launcher");
+//        Intent intent = new Intent(Intent.ACTION_MAIN);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.setComponent(cName);
+//        startActivity(intent);
+
+//        Inject.injectTK(this, base);
+        Inject.injectDirWithResourcesHooked(this, base);
+
         application = this;
     }
 }

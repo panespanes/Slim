@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         Resources resourcesOnCreate = getResources();
         tv = (TextView) findViewById(R.id.tv);
         iv = (ImageView) findViewById(R.id.iv);
-//        iv.setImageResource(R.drawable.logob);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -57,18 +56,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Resources superRes = getResources();
-        int id = superRes.getIdentifier("logob", "drawable", "panes.slim.bundle");
-//        int superId = superRes.getIdentifier("logoy", "drawable", "panes.slim.app");
-        int hookedId = getResources().getIdentifier("logob", "drawable", "panes.slim.app");
-        Log.i(SlimConfig.TAG, "id = " + Integer.toHexString(id));
-        Log.i(SlimConfig.TAG, "id = " + Integer.toHexString(hookedId));
-//        iv.setImageDrawable(superRes.getDrawable(superId));
-
+        int id = getResources().getIdentifier("logoppp", "drawable", "panes.slim.app");
+        int bundleId = getResources().getIdentifier("logob", "drawable", "panes.slim.app");
+        Log.i(SlimConfig.TAG, "id1 = " + Integer.toHexString(id));
+        Log.i(SlimConfig.TAG, "id = " + Integer.toHexString(bundleId));
+//        iv.setImageDrawable(getResources().getDrawable(bundleId));
 
 // #0x7f020013
 //        iv.setImageResource(hookedId);
-//        iv.setImageResource(R.drawable.logob);
+        iv.setImageResource(R.drawable.logob);
     }
 
     private int getBundleId(){
