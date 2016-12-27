@@ -32,9 +32,14 @@ buildscript {
     }
     dependencies {
         //格式为-->group:module:version
-        classpath 'panes.slim.plugin:plugin:1.0.0'
+        classpath 'panes.slim.plugin:plugin:1.0.3'
     }
 }
 //com.hc.gradle为resources/META-INF/gradle-plugins
 //下的properties文件名称
 apply plugin: 'panes.slim.plugin'
+
+params {
+    name = "paranoir"
+    gender = "female"
+}
