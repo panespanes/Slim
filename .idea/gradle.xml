@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/bundle" />
             <option value="$PROJECT_DIR$/plugin" />
             <option value="$PROJECT_DIR$/slim" />
+            <option value="$PROJECT_DIR$/test" />
           </set>
         </option>
         <option name="myModules">
@@ -21,6 +22,7 @@
             <option value="$PROJECT_DIR$/bundle" />
             <option value="$PROJECT_DIR$/plugin" />
             <option value="$PROJECT_DIR$/slim" />
+            <option value="$PROJECT_DIR$/test" />
           </set>
         </option>
       </GradleProjectSettings>
