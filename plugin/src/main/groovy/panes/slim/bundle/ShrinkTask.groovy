@@ -8,36 +8,33 @@ class ShrinkTask extends DefaultTask {
     void shrink() {
         String currentPath = project.getProjectDir()
         println "project.path = ${currentPath}"
-        String[] keepDirs = ["${currentPath}\\build", "${currentPath}\\src"];
-        def argDirs = project.extensions.Slim.keepDir.collect{
-            println "kepp dirs: ${it}"
+        String[] keepDirAll = ["${currentPath}\\build", "${currentPath}\\src"];
+        def keepDirExt = project.extensions.Slim.keepDir.collect{
+            println "kepp : ${it}"
             it = "${currentPath}\\${it}"
         }
-        keepDirs = keepDirs + argDirs
-        keepDirs.each {
-            println "keep: ${it}"
-        }
-
+        keepDirAll += keepDirExt
         def files = project.getProjectDir().listFiles()
-        def dirs = []
+        def dirToDelete = []
         files.each {
             if (it.isDirectory()){
-                dirs.add(it.getAbsolutePath())
+                dirToDelete.add(it.getAbsolutePath())
             }
         }
 //        files.each {File file ->
 //            String fileName = file.getName()
 //            if (file.isDirectory()){
-//                keepDirs.find {String keepDir ->
+//                keepDirAll.find {String keepDir ->
 //                    if (fileName.equals(keepDir)){
 //                        dirsToDelete.add(fileName)
 //                    }
 //                }
 //            }
 //        }
-        dirs.removeAll(keepDirs)
-        dirs.each {
-            println it
+        dirToDelete.removeAll(keepDirAll)
+        dirToDelete.each {
+            println "delete: ${it}"
+            new File(it).deleteDir()
         }
     }
 
