@@ -24,7 +24,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.1.1'
 }
-
 buildscript {
     repositories {
         maven {//本地Maven仓库地址
@@ -42,5 +41,9 @@ apply plugin: 'panes.slim.plugin'
 
 Slim {
     keepDir = ['src', 'libs']
+    source{
+        exclude = ['slim']
+    }
 }
+
 

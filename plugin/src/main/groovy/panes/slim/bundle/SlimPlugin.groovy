@@ -2,11 +2,13 @@ package panes.slim.bundle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import panes.slim.bundle.extension.SourceExtension
 
 public class SlimPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         project.extensions.create("Slim", SlimExtension)
+        project.Slim.extensions.create('source', SourceExtension)
         project.logger.error("----------------------Slim  ------------------------------------")
         project.afterEvaluate {
             // prebuild
@@ -14,7 +16,7 @@ public class SlimPlugin implements Plugin<Project> {
             // shrink
             ShrinkTask shrinkTask = project.task('shrink', type: ShrinkTask, group: "Slim", description: "decrease file size of bundle.apk")
             shrinkTask.dependsOn prebuildTask
-            // cut
+            // fill
             FillTask fillTask = project.task('fill', type:FillTask, group: "Slim", description: "delete and copy res")
 
             // genSlimBundle
@@ -23,6 +25,8 @@ public class SlimPlugin implements Plugin<Project> {
             genBundleTask.dependsOn shrinkTask
 //            genBundleTask.dependsOn assembleDebug
 //            assembleDebug.mustRunAfter shrinkTask
+
+            def checkDuplicate = project.task('checkDuplicate', type:CheckDuplicateTask, group:'Slim', description: "check duplicate name of modules' res")
         }
     }
 }

@@ -9,7 +9,10 @@ dependencies {
 repositories {
     mavenCentral()
 }
-
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
 group='panes.slim.plugin'
 version='1.0.3'
 
