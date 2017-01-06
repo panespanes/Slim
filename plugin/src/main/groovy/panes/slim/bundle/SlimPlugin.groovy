@@ -7,7 +7,7 @@ import panes.slim.bundle.extension.SourceExtension
 public class SlimPlugin implements Plugin<Project> {
 
     void apply(Project project) {
-        project.extensions.create("Slim", SlimExtension)
+        project.extensions.create("Slim", panes.slim.bundle.extension.SlimExtension)
         project.Slim.extensions.create('source', SourceExtension)
         project.logger.error("----------------------Slim  ------------------------------------")
         project.afterEvaluate {

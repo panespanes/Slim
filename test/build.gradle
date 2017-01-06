@@ -43,6 +43,7 @@ Slim {
     keepDir = ['src', 'libs']
     source{
         exclude = ['slim']
+        main = ['app']
     }
 }
 

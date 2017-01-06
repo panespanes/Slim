@@ -4,34 +4,36 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.tasks.TaskAction
+import panes.slim.bundle.task.ConflictsTask
 
 class FillTask extends DefaultTask {
     @TaskAction
     void fill() {
         def sources = ['app', 'bundle']
-        def modules = Project[]
+        def modules = []
         def exclude = project.Slim.source.exclude
-        println("exclude: ${exclude}, ${project.name}")
-        project.rootProject.allprojects.each {Project module
-            if (!module.equals(project)) {
-                def excludeRst = exclude.find{String excludeName ->
-                    !excludeName.equals(module.name)
+        def mainDirs = project.Slim.source.main
+        println("exclude: ${exclude}")
+        project.rootProject.allprojects.each {Project module ->
+                if (!module.equals(project)) {
+                    def excludeRst = exclude.find { String excludeName ->
+                        assert module
+                        excludeName.equals(module.name)
+                    }
+                    assert module && "2"
+                    if (!excludeRst) {
+                        modules << module
+                    }
                 }
-                if (!excludeRst){
-                    modules << module
-                }
-            }
+
         }
+        println "res will be detected in:"
         modules.each {
             print "${it.name}; "
             assert it instanceof Project
         }
-        println "exclude: ${project.name}"
+        println("\n")
 
-        def needCopy = []
-        def srcDirs = []
-        def mainDirs = []
-        def resDirs = []
 //            String resDir = "\\src\\main\\res"
 //        srcDirs = addDirs(modules, srcDirs, "src")
 //        if (srcDirs){
@@ -51,31 +53,44 @@ class FillTask extends DefaultTask {
 //                }
 //            }
 //        }
+        def srcDirs = []
+        def fromDirs = [] //files
         modules.each { Project module ->
             ExtensionContainer container = module.extensions
             def android = container.findByName("android")
             if (android) {
                 srcDirs = android.sourceSets.main.res.srcDirs
                 srcDirs.each { File file ->
+                    assert module
+                    fromDirs << file
                     println "${module.name}: ${file.absolutePath}"
                 }
             }
-
         }
+        println "fromDirs"
+        fromDirs.each { File file->
+            println file.absolutePath
+        }
+        println "to"
+        File to = project.extensions.android.sourceSets.main.res.srcDirs[0] // only exist one res folder in Android project
+        println "${project.name}: ${to.absolutePath}"
+        ConflictsTask conflictsTask = project.task('conflictsTask',type: ConflictsTask)
+        conflictsTask.srcDirs = fromDirs
+        conflictsTask.main = mainDirs
+        conflictsTask.execute()
+        println "conflicts: ${conflictsTask.conflicts}; flat: ${conflictsTask.flat}"
+//        for (int i=0; i<1;i++){
+//            def copyTask = project.task("copy${i}To${project.name}", type: Copy){
+//                into to.absolutePath
+//                doLast {
+//                    println "finish ${name}"
+//                }
+//            }
+//            copyTask.from(fromDirs[i].absolutePath)
+//            copyTask.con
+//            copyTask.execute()
+//        }
     }
 
-    def addDirs(def dirs, def destList, String destName) {
-        def ret = []
-        dirs.each { File root ->
-            if (root.exists() && root.isDirectory()) {
-                root.listFiles().each { File file ->
-                    if (destName.equals(file.name)) {
-                        ret << file
-                    }
-                }
-            }
-        }
-        return ret
 
-    }
 }
