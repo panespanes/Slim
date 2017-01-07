@@ -26,21 +26,20 @@ dependencies {
 }
 buildscript {
     repositories {
-        maven {//本地Maven仓库地址
+        maven {
             url uri('../repo')
         }
     }
     dependencies {
-        //格式为-->group:module:version
         classpath 'panes.slim.plugin:plugin:1.0.3'
     }
 }
-//com.hc.gradle为resources/META-INF/gradle-plugins
-//下的properties文件名称
 apply plugin: 'panes.slim.plugin'
 
 Slim {
     keepDir = ['src', 'libs']
+    mode = ['mdpi', 'xhdpi']
+    priority = 'size'
     source{
         exclude = ['slim']
         main = ['app']

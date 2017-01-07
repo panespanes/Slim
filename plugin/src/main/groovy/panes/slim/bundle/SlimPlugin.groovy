@@ -3,6 +3,11 @@ package panes.slim.bundle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import panes.slim.bundle.extension.SourceExtension
+import panes.slim.bundle.task.CheckDuplicateTask
+import panes.slim.bundle.task.FillTask
+import panes.slim.bundle.task.GenBundleTask
+import panes.slim.bundle.task.PrebuildTask
+import panes.slim.bundle.task.ShrinkTask
 
 public class SlimPlugin implements Plugin<Project> {
 
