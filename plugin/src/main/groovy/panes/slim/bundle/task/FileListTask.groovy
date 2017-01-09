@@ -2,6 +2,7 @@ package panes.slim.bundle.task
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import panes.slim.bundle.utils.StringUtil
 
 class FileListTask extends DefaultTask {
     def main = [] //File
@@ -9,20 +10,24 @@ class FileListTask extends DefaultTask {
     def conflicts = [] //File that exist conflicts
     def flat = [:] // [File : rootDir]
 //    def ALLMODES = [ 'xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
-    def ALLMODES = [ 'mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
+    def ALLMODES = [ 'mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi']
 //    def ALLMODES = [ 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi','xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
-    def xxxh = []
+    def xxxh = [] //File
     def xxh = []
     def xh = []
     def h = []
     def m = []
     def dpi = []
-    def dpiDelete  = []
+    def remain = []
+    def delete = []
+    def useless = []
+    int modeInt
     String priority = project.Slim.priority
-    def modes = project.Slim.mode
+    String mode = project.Slim.mode
     @TaskAction
     void addConflicts(){
-        modes = ['hdpi']
+        mode = 'hdpi'
+        modeInt = modeToIndex()
         if (main && main.size() > 0){
             def temp = srcDirs - main
             srcDirs = main + temp
@@ -32,47 +37,52 @@ class FileListTask extends DefaultTask {
             findDirs(src.absolutePath, src.absolutePath)
         }
         println "priority: ${priority}"
-        println "will copy ${modes} folders"
-        applyModes()
-        println "delete duplicated name result: "
-        println dpiDelete
+        println "will copy ${mode} folders"
+        delete = dpiExcept(modeIndexToList(modeInt))
+//        applyModes(1)
+        applyDpi()
+        println "final delete size = ${delete.size()}"
+//        println "delete duplicated remain result: "
+//        remain.each { File f->
+//            println f.absolutePath
+//        }
+        println "useless: "
+        useless.each {File f->
+            println f.absolutePath
+        }
     }
     // delete duplicate
-    void applyModes (){
+    void applyModes (int current){
+        println "apply mode: " << current
         def apply = [] //File
-        def modesMatch = modes.find{String it ->
-            it.equals('all')
-        }
-        if (!modesMatch){
-                modes.each {String mode ->
-                    for (int i = 4; i < ALLMODES.size() && i > -1; i++){
-                        if (ALLMODES[i].equals(mode)){
-
-                            if ("size222".equals(priority)){
-                                // TODO
-                                // 0 to 4
-                                i--
-                            } else {
-                                // 4 to -1
-
-                                modeIndexToList(i).each {File f ->
-                                    def temp = dpiExcept(modeIndexToList(i))
-                                    dpiDelete = temp
-                                    temp.each {File all ->
-                                        if (f.name.equals(all.name)){
-                                            println "name = ${f.name}"
-                                            if (flat.get(f).equals(flat.get(all))){
-                                                dpiDelete.remove(all)
-                                            }
-                                        }
-                                    }
-                                }
-//                                i++
-                            }
-//                            apply << file
-                        }
-                    }
+//        if (mode.equals('all')){
+//            return
+//        }
+        def temp = []
+        modeIndexToList(current).each {File f ->
+            println "h: ${f.absolutePath}"
+            delete.each {File all ->
+                if (f.name.equals(all.name)){
+                    temp << all
+                    useless << all
+                    println "remove ${all.absolutePath}"
+                } else {
+                    remain << all
                 }
+            }
+        }
+        println "before delete size = ${delete.size()}"
+        delete = delete - temp
+    }
+
+    void applyDpi (){
+        for (int offset=0; offset<ALLMODES.size() - 1; offset++){
+            if (modeInt + offset <ALLMODES.size()){
+                applyModes(modeInt + offset)
+            }
+            if (modeInt - offset > -1 && offset!=0){
+                applyModes(modeInt - offset)
+            }
         }
     }
 
@@ -84,15 +94,16 @@ class FileListTask extends DefaultTask {
                 if (f.isDirectory()){
                     findDirs(f.absolutePath, root)
                 } else {
-                    toFolder(f)
                     def find = flat.find {
                         File key= it.key
                         String value = it.value
-                        key.absolutePath.replace(value, "").equals(f.absolutePath.replace(root, ""))
+//                        key.absolutePath.replace(value, "").equals(f.absolutePath.replace(root, ""))
+                        StringUtil.clearResRoot(key.absolutePath, value).equals(StringUtil.clearResRoot(f.absolutePath, root))
                     }
                     if (find){
                         conflicts << f
                     } else {
+                        toFolder(f)
                         flat.put(f, root)
                     }
                 }
@@ -102,15 +113,15 @@ class FileListTask extends DefaultTask {
 
     void toFolder (File file){
          String name = file.getParent()
-         if (name.contains(ALLMODES[0])){
+         if (name.contains("-" << ALLMODES[0])){
              m << file
-         } else if (name.contains(ALLMODES[1])){
+         } else if (name.contains("-" << ALLMODES[1])){
              h << file
-         } else if (name.contains(ALLMODES[2])){
+         } else if (name.contains("-" << ALLMODES[2])){
              xh << file
-         } else if (name.contains(ALLMODES[3])){
+         } else if (name.contains("-" << ALLMODES[3])){
              xxh << file
-         } else if (name.contains(ALLMODES[4])){
+         } else if (name.contains("-" << ALLMODES[4])){
              xxxh << file
          }
 //        for (int i=0; i<ALLMODES.size(); i++){
@@ -121,35 +132,22 @@ class FileListTask extends DefaultTask {
     def modeIndexToList (int i){
         switch (i){
             case 0:
-                println "m"
                 return m
             case 1:
-                println 'h'
                 return h
             case 2:
-                println 'xh'
                 return xh
             case 3:
-                println 'xxh'
                 return xxh
             case 4:
-                println 'xxxh'
                 return xxxh
-            case 5:
-                println 'xxh'
-                return xxh
-            case 6:
-                println 'xh'
-                return xh
-            case 7:
-                println 'h'
-                return h
-            case 8:
-                println 'm'
-                return m
         }
     }
     def dpiExcept (def dpi){
         return m + h + xh + xxh +xxxh - dpi
+    }
+
+    int modeToIndex (){
+        return ALLMODES.indexOf(mode)
     }
 }

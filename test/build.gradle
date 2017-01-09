@@ -28,6 +28,7 @@ buildscript {
     repositories {
         maven {
             url uri('../repo')
+            //D:\tao.pan\personal\Slim\Slim\repo
         }
     }
     dependencies {
