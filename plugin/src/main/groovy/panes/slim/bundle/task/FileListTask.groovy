@@ -26,7 +26,7 @@ class FileListTask extends DefaultTask {
     String mode = project.Slim.mode
     @TaskAction
     void addConflicts(){
-        mode = 'hdpi'
+        mode = 'mdpi'
         modeInt = modeToIndex()
         if (main && main.size() > 0){
             def temp = srcDirs - main
@@ -38,10 +38,9 @@ class FileListTask extends DefaultTask {
         }
         println "priority: ${priority}"
         println "will copy ${mode} folders"
-        delete = dpiExcept(modeIndexToList(modeInt))
+        delete = dpiAll()
 //        applyModes(1)
         applyDpi()
-        println "final delete size = ${delete.size()}"
 //        println "delete duplicated remain result: "
 //        remain.each { File f->
 //            println f.absolutePath
@@ -60,9 +59,9 @@ class FileListTask extends DefaultTask {
 //        }
         def temp = []
         modeIndexToList(current).each {File f ->
-            println "h: ${f.absolutePath}"
-            delete.each {File all ->
+            (delete - modeIndexToList(current)).each {File all ->
                 if (f.name.equals(all.name)){
+
                     temp << all
                     useless << all
                     println "remove ${all.absolutePath}"
@@ -71,8 +70,10 @@ class FileListTask extends DefaultTask {
                 }
             }
         }
-        println "before delete size = ${delete.size()}"
         delete = delete - temp
+        [m, h, xh, xxh, xxxh].each {
+             boolean result = it.removeAll(temp)
+        }
     }
 
     void applyDpi (){
@@ -113,20 +114,11 @@ class FileListTask extends DefaultTask {
 
     void toFolder (File file){
          String name = file.getParent()
-         if (name.contains("-" << ALLMODES[0])){
-             m << file
-         } else if (name.contains("-" << ALLMODES[1])){
-             h << file
-         } else if (name.contains("-" << ALLMODES[2])){
-             xh << file
-         } else if (name.contains("-" << ALLMODES[3])){
-             xxh << file
-         } else if (name.contains("-" << ALLMODES[4])){
-             xxxh << file
-         }
-//        for (int i=0; i<ALLMODES.size(); i++){
-//            modeIndexToList(i) << file
-//        }
+        for (int i=0; i<ALLMODES.size(); i++){
+            if (name.contains("-" << ALLMODES[i])){
+                modeIndexToList(i) << file
+            }
+        }
     }
 
     def modeIndexToList (int i){
@@ -145,6 +137,9 @@ class FileListTask extends DefaultTask {
     }
     def dpiExcept (def dpi){
         return m + h + xh + xxh +xxxh - dpi
+    }
+    def dpiAll (){
+        return m + h + xh + xxh + xxxh
     }
 
     int modeToIndex (){
