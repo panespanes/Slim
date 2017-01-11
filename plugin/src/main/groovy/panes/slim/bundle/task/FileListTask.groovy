@@ -17,16 +17,24 @@ class FileListTask extends DefaultTask {
     def xh = []
     def h = []
     def m = []
-    def dpi = []
     def remain = []
     def delete = []
-    def useless = []
+    def excludes = []
     int modeInt
     String priority = project.Slim.priority
-    String mode = project.Slim.mode
+    String mode
     @TaskAction
     void addConflicts(){
-        mode = 'mdpi'
+        flat = [:]
+        conflicts = []
+        xxxh = []
+        xxh = []
+        xh = []
+        h = []
+        m = []
+        remain = []
+        delete = []
+        excludes = []
         modeInt = modeToIndex()
         if (main && main.size() > 0){
             def temp = srcDirs - main
@@ -39,32 +47,21 @@ class FileListTask extends DefaultTask {
         println "priority: ${priority}"
         println "will copy ${mode} folders"
         delete = dpiAll()
-//        applyModes(1)
-        applyDpi()
-//        println "delete duplicated remain result: "
-//        remain.each { File f->
-//            println f.absolutePath
-//        }
-        println "useless: "
-        useless.each {File f->
-            println f.absolutePath
+        if ('size'.equals(priority)){
+            applyNeighborDpi()
+        } else {
+            applyHigherDpi()
         }
     }
     // delete duplicate
     void applyModes (int current){
-        println "apply mode: " << current
-        def apply = [] //File
-//        if (mode.equals('all')){
-//            return
-//        }
         def temp = []
         modeIndexToList(current).each {File f ->
             (delete - modeIndexToList(current)).each {File all ->
                 if (f.name.equals(all.name)){
 
                     temp << all
-                    useless << all
-                    println "remove ${all.absolutePath}"
+                    excludes << all
                 } else {
                     remain << all
                 }
@@ -72,16 +69,29 @@ class FileListTask extends DefaultTask {
         }
         delete = delete - temp
         [m, h, xh, xxh, xxxh].each {
-             boolean result = it.removeAll(temp)
+             it.removeAll(temp)
         }
     }
 
-    void applyDpi (){
+    void applyNeighborDpi(){
         for (int offset=0; offset<ALLMODES.size() - 1; offset++){
             if (modeInt + offset <ALLMODES.size()){
                 applyModes(modeInt + offset)
             }
             if (modeInt - offset > -1 && offset!=0){
+                applyModes(modeInt - offset)
+            }
+        }
+    }
+
+    void applyHigherDpi(){
+        for (int offset = 0; offset<ALLMODES.size() -1; offset++){
+            if (modeInt + offset < ALLMODES.size()){
+                applyModes(modeInt + offset)
+            }
+        }
+        for (int offset =1; offset<ALLMODES.size() -1; offset++){
+            if (modeInt - offset >=0){
                 applyModes(modeInt - offset)
             }
         }
@@ -134,9 +144,6 @@ class FileListTask extends DefaultTask {
             case 4:
                 return xxxh
         }
-    }
-    def dpiExcept (def dpi){
-        return m + h + xh + xxh +xxxh - dpi
     }
     def dpiAll (){
         return m + h + xh + xxh + xxxh
