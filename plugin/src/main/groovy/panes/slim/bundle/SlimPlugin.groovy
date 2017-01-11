@@ -28,26 +28,25 @@ public class SlimPlugin implements Plugin<Project> {
             def assembleSlim = project.task('assembleSlim', type: AssembleTask, group:"Slim")
             def checkDuplicate = project.task('checkDuplicate', type:CheckDuplicateTask, group:'Slim', description: "check duplicate name of modules' res")
             def android = project.extensions.android
-            android.applicationVariants.all { variant ->
-//            variant.mergedFlavor.versionCode =
-                variant.outputs.each { output ->
-                File origin = output.outputFile
-                String dir = output.outputFile.getAbsolutePath()
-                println "dir = ${dir}"
-                File parent = new File ("${origin.getParentFile().getParentFile().getParentFile().getAbsolutePath()}\\Slim\\output")
-                if (!parent.exists()){
-                    parent.mkdirs()
-                }
-                String path = genPath(parent.absolutePath, variant.versionName)
-                println "path in SlimPlugin = ${path}"
-                output.outputFile = new File(path)
-//                output.outputFile = new File("D:\\demo\\1.apk")
-                }
-            }
-            assembleSlim.doLast{
-                def assembleDebug = project.tasks.findByName('assembleDebug')
-                assembleDebug.execute()
-            }
+//            android.applicationVariants.all { variant ->
+////            variant.mergedFlavor.versionCode =
+//                variant.outputs.each { output ->
+//                File origin = output.outputFile
+//                String dir = output.outputFile.getAbsolutePath()
+//                println "dir = ${dir}"
+//                File parent = new File ("${origin.getParentFile().getParentFile().getParentFile().getAbsolutePath()}\\Slim\\output")
+//                if (!parent.exists()){
+//                    parent.mkdirs()
+//                }
+//                String path = genPath(parent.absolutePath, variant.versionName)
+//                println "path in SlimPlugin = ${path}"
+//                output.outputFile = new File(path)
+////                output.outputFile = new File("D:\\demo\\1.apk")
+//                }
+//            }
+            def assembleDebug = project.tasks.findByName('assembleDebug')
+
+            assembleSlim.finalizedBy(assembleDebug)
         }
     }
     String genPath (String parent, String versionName){

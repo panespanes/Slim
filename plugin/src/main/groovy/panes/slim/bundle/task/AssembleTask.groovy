@@ -16,19 +16,23 @@ class AssembleTask extends DefaultTask{
 //            variant.mergedFlavor.versionCode =
             variant.outputs.each { output ->
                 File origin = output.outputFile
-                println "task path = ${origin.absolutePath}"
+                String dir = output.outputFile.getAbsolutePath()
+                println "dir = ${dir}"
+                File parent = new File("${origin.getParentFile().getParentFile().getParentFile().getAbsolutePath()}\\Slim\\output")
+                if (!parent.exists()) {
+                    parent.mkdirs()
+                }
+                path = genPath(parent.absolutePath, variant.versionName)
+                println "path in SlimPlugin = ${path}"
+                output.outputFile = new File(path)
+//                output.outputFile = new File("D:\\demo\\1.apk")
             }
-        }
 //        println "output path = ${path}"
 //        File destFile = new File(path)
 //        if (destFile.exists()){
 //            destFile.delete()
 //        }
-
-//        def assembleDebug = project.tasks.findByName('assembleDebug')
-//        assembleDebug.execute()
-//        println 'assemble finish.'
-
+        }
     }
 
     String genPath (String parent, String versionName){
