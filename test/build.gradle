@@ -39,15 +39,14 @@ apply plugin: 'panes.slim.plugin'
 
 Slim {
     keepDir = ['src', 'libs']
-    mode = ['hdpi']
     priority = 'quality'
     source{
         exclude = ['slim']
         main = ['app']
     }
     output{
-        dir = '../dir'
-        backup = '../dir'
+        fileName = 'bundle'
+        mode = ['hdpi', 'xhdpi']
     }
 }
 

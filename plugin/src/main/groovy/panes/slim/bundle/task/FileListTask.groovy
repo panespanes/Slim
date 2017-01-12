@@ -10,7 +10,7 @@ class FileListTask extends DefaultTask {
     def conflicts = [] //File that exist conflicts
     def flat = [:] // [File : rootDir]
 //    def ALLMODES = [ 'xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
-    def ALLMODES = [ 'mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi']
+    static def ALLMODES = [ 'mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi']
 //    def ALLMODES = [ 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi','xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
     def xxxh = [] //File
     def xxh = []
@@ -108,7 +108,6 @@ class FileListTask extends DefaultTask {
                     def find = flat.find {
                         File key= it.key
                         String value = it.value
-//                        key.absolutePath.replace(value, "").equals(f.absolutePath.replace(root, ""))
                         StringUtil.clearResRoot(key.absolutePath, value).equals(StringUtil.clearResRoot(f.absolutePath, root))
                     }
                     if (find){

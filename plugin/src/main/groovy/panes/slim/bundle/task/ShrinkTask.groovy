@@ -9,6 +9,25 @@ class ShrinkTask extends DefaultTask {
     void shrink() {
         String currentPath = project.getProjectDir()
         println "project.path = ${currentPath}"
+        def android = project.extensions.android
+        def srcFiles = android.sourceSets.main.res.srcDirs
+        def javaFiles = android.sourceSets.main.java.srcDirs
+        def testFiles = android.sourceSets.androidTest
+        def javatest = android.sourceSets.test
+        println "src = ${srcFiles}; java = ${javaFiles}; test = ${testFiles}; javatest = ${javatest}"
+        srcFiles.each{
+            it.delete()
+        }
+        javaFiles.each{
+            it.delete()
+        }
+        testFiles.metaClass.properties.each {
+            MetaBeanProperty property = it
+            println property.name
+        }
+//        testFiles.each{
+//            it.delete()
+//        }
         String[] keepDirAll = ["${currentPath}\\build", "${currentPath}\\src"];
         def keepDirExt = project.extensions.Slim.keepDir.collect{
             println "kepp : ${it}"

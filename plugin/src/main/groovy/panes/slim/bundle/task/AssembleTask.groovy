@@ -7,6 +7,7 @@ import panes.slim.bundle.extension.OutPutExtension
 
 class AssembleTask extends DefaultTask{
     OutPutExtension outPutExtension
+    String mode
     @TaskAction
     void invoke(){
         String path
@@ -17,26 +18,23 @@ class AssembleTask extends DefaultTask{
             variant.outputs.each { output ->
                 File origin = output.outputFile
                 String dir = output.outputFile.getAbsolutePath()
-                println "dir = ${dir}"
                 File parent = new File("${origin.getParentFile().getParentFile().getParentFile().getAbsolutePath()}\\Slim\\output")
                 if (!parent.exists()) {
                     parent.mkdirs()
                 }
                 path = genPath(parent.absolutePath, variant.versionName)
-                println "path in SlimPlugin = ${path}"
                 output.outputFile = new File(path)
-//                output.outputFile = new File("D:\\demo\\1.apk")
             }
-//        println "output path = ${path}"
-//        File destFile = new File(path)
-//        if (destFile.exists()){
-//            destFile.delete()
-//        }
+        println "output path: ${path}"
+        File destFile = new File(path)
+        if (destFile.exists()){
+            destFile.delete()
+        }
         }
     }
 
     String genPath (String parent, String versionName){
-        //\test\build\Slim\output\SlimBundle_v1.0.3_201701111648.apk
-        return parent << "\\" << outPutExtension.fileName <<  "_v" << versionName <<"_" <<new Date().format("yyyyMMddHHmm")<<".apk"
+        //\test\build\Slim\output\bundle_xhdpi_v1.0.3_201701111648.apk
+        return parent << "\\" << outPutExtension.fileName <<"_"<< mode <<  "_v" << versionName <<"_" <<new Date().format("yyyyMMddHHmm")<<".apk"
     }
 }

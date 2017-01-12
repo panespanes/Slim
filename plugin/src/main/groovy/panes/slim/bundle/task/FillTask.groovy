@@ -12,6 +12,7 @@ import org.gradle.api.tasks.TaskAction
 import java.lang.reflect.Type
 
 class FillTask extends DefaultTask {
+    String mode
     @TaskAction
     void fill() {
         def sources = ['app', 'bundle']
@@ -107,47 +108,33 @@ class FillTask extends DefaultTask {
         println "to"
         File to = project.extensions.android.sourceSets.main.res.srcDirs[0] // only exist one res folder in Android project
         println "${project.name}: ${to.absolutePath}"
-        FileListTask fileListTask = project.task('fileListTask',type: FileListTask)
+        FileListTask fileListTask = project.task("fileListTask${mode}",type: FileListTask)
         assert fromDirs instanceof ArrayList<File>
         fileListTask.srcDirs = fromDirs
         assert mainFiles instanceof ArrayList<File>
         fileListTask.main = mainDirs
-        def mode = project.Slim.mode
-        def findMatch = mode.find{String it->
-            it.equals('all')
-        }
-        def execFileList = {String it->
-            println 'apply mode: ' << it
-            fileListTask.mode = it
-            fileListTask.addConflicts()
-            println 'excludes: '
-            fileListTask.excludes.each { File f ->
-                println f.absolutePath
-            }
 
-            ((fileListTask.flat.keySet() as List) - fileListTask.excludes).each {File file ->
-                AbstractCopyTask copyTask = project.task("copy${file.absolutePath}", type: Copy, group: "Slim")
-                String old = file.parentFile.absolutePath
-                def moduleMatch = modules.findAll{Project module ->
-                    old.contains(module.projectDir.absolutePath)
-                }
-                String dest = old.replace(moduleMatch[0].projectDir.absolutePath, project.projectDir.absolutePath)
-                println "dest = ${dest}"
-                copyTask.from(file.absolutePath)
-                copyTask.into(dest)
-                copyTask.execute()
-            }
+        println 'apply mode: ' << mode
+        fileListTask.mode = mode
+        fileListTask.addConflicts()
+        println 'excludes: '
+        fileListTask.excludes.each { File f ->
+            println f.absolutePath
         }
-        if (findMatch){
-            fileListTask.ALLMODES.each {
-               execFileList(it)
-            }
-        } else {
-            fileListTask.ALLMODES.intersect(mode).each {
-                execFileList(it)
-            }
 
+        ((fileListTask.flat.keySet() as List) - fileListTask.excludes).each {File file ->
+            AbstractCopyTask copyTask = project.task("copy${mode}${file.absolutePath}", type: Copy, group: "Slim")
+            String old = file.parentFile.absolutePath
+            def moduleMatch = modules.findAll{Project module ->
+                old.contains(module.projectDir.absolutePath)
+            }
+            String dest = old.replace(moduleMatch[0].projectDir.absolutePath, project.projectDir.absolutePath)
+            println "dest = ${dest}"
+            copyTask.from(file.absolutePath)
+            copyTask.into(dest)
+            copyTask.execute()
         }
+
     }
 
 

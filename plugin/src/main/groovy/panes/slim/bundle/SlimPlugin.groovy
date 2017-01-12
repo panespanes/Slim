@@ -23,34 +23,32 @@ public class SlimPlugin implements Plugin<Project> {
             // genSlimBundle
             GenBundleTask genBundleTask = project.task('genSlimBundle', type: GenBundleTask, group: "Slim", description: "generate bundle.apk")
 //            genBundleTask.dependsOn shrinkTask
-            // fill
-            FillTask fillTask = project.task('fill', type:FillTask, group: "Slim", description: "delete and copy res")
-            def assembleSlim = project.task('assembleSlim', type: AssembleTask, group:"Slim")
+
             def checkDuplicate = project.task('checkDuplicate', type:CheckDuplicateTask, group:'Slim', description: "check duplicate name of modules' res")
-            def android = project.extensions.android
-//            android.applicationVariants.all { variant ->
-////            variant.mergedFlavor.versionCode =
-//                variant.outputs.each { output ->
-//                File origin = output.outputFile
-//                String dir = output.outputFile.getAbsolutePath()
-//                println "dir = ${dir}"
-//                File parent = new File ("${origin.getParentFile().getParentFile().getParentFile().getAbsolutePath()}\\Slim\\output")
-//                if (!parent.exists()){
-//                    parent.mkdirs()
-//                }
-//                String path = genPath(parent.absolutePath, variant.versionName)
-//                println "path in SlimPlugin = ${path}"
-//                output.outputFile = new File(path)
-////                output.outputFile = new File("D:\\demo\\1.apk")
-//                }
-//            }
             def assembleDebug = project.tasks.findByName('assembleDebug')
 
-            assembleSlim.finalizedBy(assembleDebug)
+            def modes = project.Slim.output.mode
+            def findMatch = modes.find{String mode->
+                mode.equals('all')
+            }
+            if (findMatch){
+                modes = FileListTask.ALLMODES
+            }
+            FileListTask.ALLMODES.each {
+                // fill
+                FillTask fillTask = project.task("fill${it}", type:FillTask, group: "Slim", description: "delete and copy res")
+                fillTask.mode = it
+                AssembleTask assembleSlim = project.task("assemble${it}", type: AssembleTask, group:"Slim")
+                assembleSlim.finalizedBy(assembleDebug)
+                assembleSlim.mode = it
+                assembleSlim.dependsOn fillTask
+                AssembleSpecificTask dpiTask = project.task("${it}",type:AssembleSpecificTask, group: "Slim")
+                dpiTask.mode = it
+            }
+            AssembleSpecificTask allDpiTask = project.task("alldpi", type:AssembleSpecificTask, group:"Slim")
+            allDpiTask.mode = "all"
+            AssembleSpecificTask speDpiTask = project.task("assembleSlim", type:AssembleSpecificTask, group:"Slim")
+            speDpiTask.mode = "specific"
         }
-    }
-    String genPath (String parent, String versionName){
-        //\test\build\Slim\output\SlimBundle_v1.0.3_201701111648.apk
-        return parent << "\\" << "SlimBundle" <<  "_v" << versionName <<"_" <<new Date().format("yyyyMMddHHmm")<<".apk"
     }
 }
