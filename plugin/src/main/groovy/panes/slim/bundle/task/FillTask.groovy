@@ -105,9 +105,9 @@ class FillTask extends DefaultTask {
         fromDirs.each { File file->
             println file.absolutePath
         }
-        println "to"
-        File to = project.extensions.android.sourceSets.main.res.srcDirs[0] // only exist one res folder in Android project
-        println "${project.name}: ${to.absolutePath}"
+//        println "to"
+//        File to = project.extensions.android.sourceSets.main.res.srcDirs[0] // only exist one res folder in Android project
+//        println "${project.name}: ${to.absolutePath}"
         FileListTask fileListTask = project.task("fileListTask${mode}",type: FileListTask)
         assert fromDirs instanceof ArrayList<File>
         fileListTask.srcDirs = fromDirs
