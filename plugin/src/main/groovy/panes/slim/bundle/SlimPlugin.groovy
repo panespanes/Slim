@@ -14,15 +14,10 @@ public class SlimPlugin implements Plugin<Project> {
         project.Slim.extensions.create('output', OutPutExtension)
         project.logger.error("----------------------Slim  ------------------------------------")
         project.afterEvaluate {
-            // prebuild
             PrebuildTask prebuildTask = project.task('prebuild', type:PrebuildTask, group:"Slim", description: "check environment")
-            // shrink
             ShrinkTask shrinkTask = project.task('shrink', type: ShrinkTask, group: "Slim", description: "decrease file size of bundle.apk")
             shrinkTask.dependsOn prebuildTask
 
-            // genSlimBundle
-            GenBundleTask genBundleTask = project.task('genSlimBundle', type: GenBundleTask, group: "Slim", description: "generate bundle.apk")
-//            genBundleTask.dependsOn shrinkTask
 
             def checkDuplicate = project.task('checkDuplicate', type:CheckDuplicateTask, group:'Slim', description: "check duplicate name of modules' res")
             def assembleDebug = project.tasks.findByName('assembleDebug')
@@ -37,18 +32,16 @@ public class SlimPlugin implements Plugin<Project> {
             FileListTask.ALLMODES.each {
                 // fill
                 FillTask fillTask = project.task("fill${it}", type:FillTask, group: "Slim", description: "delete and copy res")
+                fillTask.dependsOn shrinkTask
                 fillTask.mode = it
                 AssembleTask assembleSlim = project.task("assemble${it}", type: AssembleTask, group:"Slim")
                 assembleSlim.finalizedBy(assembleDebug)
                 assembleSlim.mode = it
                 assembleSlim.dependsOn fillTask
-                AssembleSpecificTask dpiTask = project.task("${it}",type:AssembleSpecificTask, group: "Slim")
-                dpiTask.mode = it
+                project.task("${it}", group: "Slim", dependsOn: assembleSlim)
             }
-            AssembleSpecificTask allDpiTask = project.task("alldpi", type:AssembleSpecificTask, group:"Slim")
-            allDpiTask.mode = "all"
-            AssembleSpecificTask speDpiTask = project.task("assembleSlim", type:AssembleSpecificTask, group:"Slim")
-            speDpiTask.mode = "specific"
+            def allDpiTask = project.task("alldpi", group:"Slim")
+            allDpiTask.dependsOn FileListTask.ALLMODES
         }
     }
 }

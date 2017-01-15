@@ -9,6 +9,8 @@ class PrebuildTask extends DefaultTask{
     void prebuild(){
         if (!project.plugins.hasPlugin('com.android.application')) {
             throw new GradleException("'${project.name}' module must apply plugin 'com.android.application'")
+        } else {
+            println "prebuild done"
         }
     }
 }

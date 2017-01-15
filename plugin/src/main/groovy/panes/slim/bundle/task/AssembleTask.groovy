@@ -25,11 +25,12 @@ class AssembleTask extends DefaultTask{
                 path = genPath(parent.absolutePath, variant.versionName)
                 output.outputFile = new File(path)
             }
+
+        }
         println "output path: ${path}"
         File destFile = new File(path)
         if (destFile.exists()){
             destFile.delete()
-        }
         }
     }
 

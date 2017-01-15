@@ -1,7 +1,3 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.bill99.test">
-
-    <application
-        >
-    </application>
-    <version>1</version>
+<?xml version="1.0" encoding="UTF-8"?><manifest package="com.bill99.test">
+  <application/>
 </manifest>

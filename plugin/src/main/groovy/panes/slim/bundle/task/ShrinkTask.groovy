@@ -1,7 +1,9 @@
 package panes.slim.bundle.task
 
 import groovy.util.slurpersupport.GPathResult
+import groovy.xml.MarkupBuilder
 import groovy.xml.QName
+import groovy.xml.XmlUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.tasks.TaskAction
@@ -36,19 +38,7 @@ class ShrinkTask extends DefaultTask {
                 f.parentFile.deleteDir()
             }
         }
-//        androidTestFiles.metaClass.properties.each {
-//            MetaBeanProperty property = it
-//            if (property.name.equals("root")){
-//                println "root = " << property.getProperty()
-//            }
-//            println "${property.name}: ${property.type}"
-//            if (property.name.equals('root')){
-////                println "root = ${property.getProperty('root')}"
-//            }
-//        }
-//        androidTestFiles.metaClass.getMetaPropertyValues().each {
-//            println "${it.name}: ${it.value}"
-//        }
+
         String[] keepDirAll = ["${currentPath}\\build", "${currentPath}\\src"];
         def keepDirExt = project.extensions.Slim.keepDir.collect{
             println "kepp : ${it}"
@@ -62,20 +52,16 @@ class ShrinkTask extends DefaultTask {
                 dirToDelete.add(it.getAbsolutePath())
             }
         }
-//        files.each {File file ->
-//            String fileName = file.getName()
-//            if (file.isDirectory()){
-//                keepDirAll.find {String keepDir ->
-//                    if (fileName.equals(keepDir)){
-//                        dirsToDelete.add(fileName)
-//                    }
-//                }
-//            }
-//        }
+
         dirToDelete.removeAll(keepDirAll)
         dirToDelete.each {
             println "delete: ${it}"
             new File(it).deleteDir()
+        }
+        new File(AndroidUtil.manifestPath(project)).parentFile.listFiles().each {
+            if (!it.name.equals("AndroidManifest.xml")){
+                it.delete()
+            }
         }
         DependencySet compilesDependencies = project.configurations.compile.dependencies
         DependencySet testDependencies = project.configurations.testCompile.dependencies
@@ -99,56 +85,38 @@ class ShrinkTask extends DefaultTask {
         compile: support-annotations-24.1.1.jar
 */
 
-        /**
-         * <a  attr = 1>    .@attr / [@attr]
-         *      <b>         .name().each / .b
-         *
-         *      </b>
-         *
-         * </a>
-         */
-//        GPathResult androidManifest = new XmlSlurper().parse(AndroidUtil.manifestPath(project))
-        GPathResult androidManifest = new XmlSlurper().parse("D:\\tao.pan\\personal\\Slim\\Slim\\test\\src\\main\\test.xml")
-//        println androidManifest['@android:versionName']
-        println androidManifest.application.@'android:supportsRtl'
-        println androidManifest.name()
-        androidManifest.children().each {GPathResult r->
-            println "body = $r"
-            println r.getProperty("android:supportsRtl")
+        String manifestPath = AndroidUtil.manifestPath(project)
+        String packageValue
+        def parser = new XmlParser().parse(manifestPath)
+
+        packageValue = parser.attributes().find {
+           'package'.equals(it.key)
+        }.value
+//        def xmlWriter = new StringWriter()
+//        def xmlMarkup = new MarkupBuilder(xmlWriter)
+//        xmlMarkup.'manifest'(
+//                'xmlns:android':'http://schemas.android.com/apk/res/android',
+//                'package':"${packageValue}"){
+//            'application'()
+//        }
+//        def manifest =
+//                new XmlSlurper()
+//                        .parseText(xmlWriter.toString())
+//                        .declareNamespace(android:'http://schemas.android.com/apk/res/android')
+
+        parser.application.replaceNode{
+            application(){}
         }
-//        androidManifest.application.replaceNode {
-//            application(panes:"slim"){
-//                test("title")
-//            }
-//        }
-        def parser = new XmlParser().parse("D:\\tao.pan\\personal\\Slim\\Slim\\test\\src\\main\\test.xml")
-//        parser.application.replaceNode {
-//            application(panes:"slim"){
-//                test("title")
-//            }
-//        }
-        parser.appendNode(
-                new QName("numberOfResults"),
-                [:],
-                "1"
-        )
-        println "qname = ${parser.numberOfResults.text()}"
+        def allNodes = parser.children().findAll {Node it->
+            !it.name().equals('application')
+        }
+        allNodes.each {
+            parser."${it.name()}".replaceNode{
+            }
+        }
 
-        /**
-         * def catcherInTheRye = response.value.books.'*'.find { node->
-         /* node.@id == 2 could be expressed as node['@id'] == 2
-                node.name() == 'book' && node.@id == '2'
-         }
-         */
-        /**
-         * response.value.books.book[0].replaceNode{
-         book(id:"3"){
-         title("To Kill a Mockingbird")
-         author(id:"3","Harper Lee")
-         }
-         }
-
-         */
+        String serialize = XmlUtil.serialize(parser)
+        new File(manifestPath).write(serialize)
     }
 
 }
