@@ -15,20 +15,22 @@ class FillTask extends DefaultTask {
     String mode
     @TaskAction
     void fill() {
-        def sources = ['app', 'bundle']
         def modules = []
         def exclude = project.Slim.source.exclude
         def mainNames = project.Slim.source.main
         def mainFiles = []
         def mainDirs = []
+
         println("exclude: ${exclude}")
         project.rootProject.allprojects.each {Project module ->
-            def mainMatch = mainNames.find{
-                module.name.equals(it)
-            }
-            if (mainMatch){
-                mainFiles << module
-            }
+            // use another loop instead of leftshift in order to maintain the original order of mainNames
+
+//            def mainMatch = mainNames.find{
+//                module.name.equals(it)
+//            }
+//            if (mainMatch){
+//                mainFiles << module
+//            }
             if (!module.equals(project)) {
                 def excludeRst = exclude.find { String excludeName ->
                     assert module
@@ -40,6 +42,14 @@ class FillTask extends DefaultTask {
             }
 
         }
+        mainNames.each{
+            def find = project.rootProject.allprojects.find{Project module ->
+                module.name.equals(it)
+            }
+            if (find){
+                mainFiles << find
+            }
+        }
         modules.sort{a,b->
             b.projectDir.absolutePath.size() <=> a.projectDir.absolutePath.size()
         }
@@ -50,25 +60,6 @@ class FillTask extends DefaultTask {
         }
         println("\n")
 
-//            String resDir = "\\src\\main\\res"
-//        srcDirs = addDirs(modules, srcDirs, "src")
-//        if (srcDirs){
-//            mainNames = addDirs(srcDirs, mainNames, "main")
-//            if (mainNames){
-//                resDirs = addDirs(mainNames, resDirs, "res")
-//                resDirs.each {File resDir ->
-//                    println resDir.absolutePath
-//                    def android = project.extensions.android
-//                    def manifestFile = android.sourceSets.main.manifest.srcFile
-//                    def packageName = new XmlParser().parse(manifestFile).attribute('package')
-//                    println packageName
-//                    def dirs = android.sourceSets.main.res.srcDirs
-//                    dirs.each { File dir ->
-//                        println dir.absolutePath
-//                    }
-//                }
-//            }
-//        }
         def srcDirs = []
         def fromDirs = [] //files
         def projectToDir = {def projects ->
@@ -89,25 +80,10 @@ class FillTask extends DefaultTask {
         }
         fromDirs = projectToDir(modules)
         mainDirs = projectToDir(mainFiles)
-//        modules.each { Project module ->
-//            ExtensionContainer container = module.extensions
-//            def android = container.findByName("android")
-//            if (android) {
-//                srcDirs = android.sourceSets.main.res.srcDirs
-//                srcDirs.each { File file ->
-//                    assert module
-//                    fromDirs << file
-//                    println "${module.name}: ${file.absolutePath}"
-//                }
-//            }
-//        }
         println "fromDirs"
         fromDirs.each { File file->
             println file.absolutePath
         }
-//        println "to"
-//        File to = project.extensions.android.sourceSets.main.res.srcDirs[0] // only exist one res folder in Android project
-//        println "${project.name}: ${to.absolutePath}"
         FileListTask fileListTask = project.task("fileListTask${mode}",type: FileListTask)
         assert fromDirs instanceof ArrayList<File>
         fileListTask.srcDirs = fromDirs

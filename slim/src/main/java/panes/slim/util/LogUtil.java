@@ -13,4 +13,10 @@ public class LogUtil {
             Log.i(SlimConfig.TAG, log);
         }
     }
+
+    public static void e (String log){
+        if (SlimConfig.isDebug){
+            Log.e(SlimConfig.TAG, log);
+        }
+    }
 }

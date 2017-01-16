@@ -30,7 +30,7 @@ import panes.slim.inflater.resources.drawable.DrawableInflater;
  */
 public class Slim {
     /**
-     * call when application created in case of long time starting activity.
+     * call when application created in case of long time waiting when activity starts.
      */
     public static void init(Application application) {
         try {

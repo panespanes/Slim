@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +13,10 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+
 import panes.slim.SlimConfig;
+import panes.slim.so.SlimNativeLoad;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "Slim";
@@ -28,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         Resources resourcesOnCreate = getResources();
         tv = (TextView) findViewById(R.id.tv);
         iv = (ImageView) findViewById(R.id.iv);
-
+        ((TextView)findViewById(R.id.devicetoken)).setText(MyApplication.deviceToken);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
@@ -65,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
 // #0x7f020013
 //        iv.setImageResource(hookedId);
         iv.setImageResource(R.drawable.logob);
+
+        boolean loadResult = SlimNativeLoad.loadNative(this, Environment.getExternalStorageDirectory() + File.separator + "libtnet-3.1.7.so");
+        Log.i(SlimConfig.TAG, "load = " + loadResult);
     }
 
     private int getBundleId(){

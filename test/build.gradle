@@ -40,13 +40,15 @@ apply plugin: 'panes.slim.plugin'
 Slim {
     keepDir = ['src', 'libs']
     priority = 'quality'
+    base = 'mdpi'
     source{
-        exclude = ['slim']
+        exclude = ['slim' ,'PushSDK']
         main = ['app']
     }
     output{
         fileName = 'bundle'
         mode = ['hdpi', 'xhdpi']
+        backup = "D:\\tao.pan\\personal\\Slim"
     }
 }
 

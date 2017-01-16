@@ -14,12 +14,11 @@ public class SlimPlugin implements Plugin<Project> {
         project.Slim.extensions.create('output', OutPutExtension)
         project.logger.error("----------------------Slim  ------------------------------------")
         project.afterEvaluate {
-            PrebuildTask prebuildTask = project.task('prebuild', type:PrebuildTask, group:"Slim", description: "check environment")
+            PrebuildTask prebuildTask = project.task('slimPreBuild', type:PrebuildTask, group:"Slim", description: "check environment")
             ShrinkTask shrinkTask = project.task('shrink', type: ShrinkTask, group: "Slim", description: "decrease file size of bundle.apk")
             shrinkTask.dependsOn prebuildTask
+            project.task('evaluate', type:EvaluateTask, group:"Slim", description: "have a glance at the probable result of Slim frame")
 
-
-            def checkDuplicate = project.task('checkDuplicate', type:CheckDuplicateTask, group:'Slim', description: "check duplicate name of modules' res")
             def assembleDebug = project.tasks.findByName('assembleDebug')
 
             def modes = project.Slim.output.mode

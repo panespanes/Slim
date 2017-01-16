@@ -1,1 +1,1 @@
-include ':slim', ':bundle', ':app', ':plugin', ':plugin', ':test'
+include ':slim', ':bundle', ':app', ':plugin', ':plugin', ':test', ':PushSDK'

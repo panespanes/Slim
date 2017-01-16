@@ -6,7 +6,7 @@
         android:allowBackup="true"
         android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="slim"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
         <activity android:name=".MainActivity" >
@@ -16,6 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="587c4f21b27b0a6567000c0b">
+        </meta-data>
+        <meta-data
+            android:name="UMENG_MESSAGE_SECRET"
+            android:value="ef3c555abf7aa792068ef229db64b5bf">
+        </meta-data>
     </application>
 
 </manifest>

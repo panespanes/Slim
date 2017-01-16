@@ -45,7 +45,6 @@ class FileListTask extends DefaultTask {
             findDirs(src.absolutePath, src.absolutePath)
         }
         println "priority: ${priority}"
-        println "will copy ${mode} folders"
         delete = dpiAll()
         if ('size'.equals(priority)){
             applyNeighborDpi()
