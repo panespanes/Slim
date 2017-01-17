@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         Resources resourcesOnCreate = getResources();
         tv = (TextView) findViewById(R.id.tv);
         iv = (ImageView) findViewById(R.id.iv);
-        ((TextView)findViewById(R.id.devicetoken)).setText(MyApplication.deviceToken);
+        ((TextView)findViewById(R.id.devicetoken)).setText("");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);

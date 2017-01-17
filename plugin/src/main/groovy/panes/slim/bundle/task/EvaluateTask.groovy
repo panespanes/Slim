@@ -82,7 +82,6 @@ class EvaluateTask extends DefaultTask{
                 pw.write(f.absolutePath)
                 pw.write("\n")
             }
-
         }
         pw.flush()
         pw.close()
